@@ -1,35 +1,26 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import axios from 'axios';
+import { useState } from 'react';
+// ... other imports
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const [destinations, setDestinations] = useState([]);
+  const [token, setToken] = useState('');
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+  const getToken = async () => {
+    const response = await axios.post('https://test.api.amadeus.com/v1/security/oauth2/token', 
+      'grant_type=client_credentials&client_id=YOUR_ID&client_secret=YOUR_SECRET',
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    );
+    setToken(response.data.access_token);
+  };
 
-export default App
+  const handleSearch = async (query) => {
+    if (!token) await getToken();
+    const response = await axios.get(`https://test.api.amadeus.com/v1/reference-data/locations?keyword=${query}&subType=CITY`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setDestinations(response.data.data);
+  };
+
+  // Render SearchBar and list
+};
