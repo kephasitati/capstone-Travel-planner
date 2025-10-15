@@ -1,3 +1,5 @@
+import React from 'react';
+
 interface HeaderProps {
   itineraryCount: number;
   onToggleItinerary: () => void;
