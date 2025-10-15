@@ -1,38 +1,32 @@
 import { Search } from "lucide-react";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
 
-/**
- * @typedef {Object} SearchBarProps
- * @property {string} value
- * @property {(value: string) => void} onChange
- * @property {() => void} onSearch
- * @property {string} [placeholder]
- */
+interface SearchBarProps {
+  value: string;
+  onChange: (value: string) => void;
+  onSearch: () => void;
+}
 
-/**
- * @param {SearchBarProps} props
- */
-export function SearchBar({ value, onChange, onSearch, placeholder = "Search destinations..." }) {
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      onSearch();
-    }
-  };
-
+export function SearchBar({ value, onChange, onSearch }: SearchBarProps) {
   return (
-    <div className="flex gap-2 w-full max-w-2xl">
-      <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
-        <Input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder={placeholder}
-          className="pl-10 bg-input-background"
-        />
+    <div className="my-8">
+      <div className="flex gap-2 max-w-xl mx-auto">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-3 text-muted-foreground" size={20} />
+          <input
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && onSearch()}
+            placeholder="Search destinations..."
+            className="w-full pl-10 pr-4 py-2 border rounded-lg"
+          />
+        </div>
+        <button 
+          onClick={onSearch} 
+          className="px-6 py-2 bg-primary text-primary-foreground rounded-lg"
+        >
+          Search
+        </button>
       </div>
-      <Button onClick={onSearch}>Search</Button>
     </div>
   );
 }
