@@ -1,6 +1,6 @@
 import type { Destination } from "../components/DestinationCard";
 import type { Flight } from "../components/FlightCard";
-import type { HotelOffer } from "../components/Header";
+import type { HotelOffer } from "../components/HotelCard";
 
 // Mock destinations data - Africa focused, mainly Kenya
 export const mockDestinations: Record<string, Destination[]> = {

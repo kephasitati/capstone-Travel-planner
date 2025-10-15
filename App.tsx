@@ -1,17 +1,10 @@
 import { useState } from "react";
-import { X, Trash2 } from "lucide-react";
+import { X } from "lucide-react";
 import { searchDestinations, mockAttractions, mockFlights, mockHotels } from "./lib/mockData";
 import { Header } from "./components/Header";
 import { SearchBar } from "./components/SearchBar";
-
-interface Destination {
-  id: string;
-  name: string;
-  country: string;
-  cityCode: string;
-  imageUrl: string;
-  description?: string;
-}
+import { DestinationCard, type Destination } from "./components/DestinationCard";
+import { ItineraryPlanner } from "./components/ItineraryPlanner";
 
 export default function App() {
   const [search, setSearch] = useState("");
@@ -41,48 +34,24 @@ export default function App() {
 
         <div className="grid md:grid-cols-3 gap-6">
           {destinations.map((dest) => (
-            <div key={dest.id} className="border rounded-lg overflow-hidden">
-              <img src={dest.imageUrl} alt={dest.name} onClick={() => setSelected(dest)} className="w-full aspect-video object-cover cursor-pointer" />
-              <div className="p-4">
-                <h3>{dest.name}</h3>
-                <p className="text-muted-foreground my-2">{dest.country}</p>
-                <button 
-                  onClick={() => !itinerary.find(d => d.id === dest.id) && setItinerary([...itinerary, dest])}
-                  className={`w-full py-2 rounded-lg ${itinerary.find(d => d.id === dest.id) ? 'bg-secondary' : 'bg-primary text-primary-foreground'}`}
-                >
-                  {itinerary.find(d => d.id === dest.id) ? "Added" : "Add to Safari"}
-                </button>
-              </div>
-            </div>
+            <DestinationCard
+              key={dest.id}
+              destination={dest}
+              onView={setSelected}
+              onAddToItinerary={(dest) => setItinerary([...itinerary, dest])}
+              isInItinerary={!!itinerary.find(d => d.id === dest.id)}
+            />
           ))}
         </div>
       </main>
 
       {/* Itinerary */}
-      {showItinerary && (
-        <div className="fixed right-0 top-0 h-full w-96 bg-card border-l z-50">
-          <div className="p-6 border-b flex justify-between">
-            <h3>My Safari</h3>
-            <button onClick={() => setShowItinerary(false)}>
-              <X size={20} />
-            </button>
-          </div>
-          
-          <div className="p-6 space-y-4">
-            {itinerary.map((dest) => (
-              <div key={dest.id} className="border rounded-lg p-4 flex justify-between">
-                <div>
-                  <h4>{dest.name}</h4>
-                  <p className="text-muted-foreground">{dest.country}</p>
-                </div>
-                <button onClick={() => setItinerary(itinerary.filter(d => d.id !== dest.id))}>
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      <ItineraryPlanner
+        itinerary={itinerary}
+        isOpen={showItinerary}
+        onClose={() => setShowItinerary(false)}
+        onRemove={(id) => setItinerary(itinerary.filter(d => d.id !== id))}
+      />
 
       {/* Details */}
       {selected && (
