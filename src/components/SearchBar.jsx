@@ -1,25 +1,34 @@
-import { useState } from 'react';
+import { Search } from "lucide-react";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
 
-const SearchBar = ({ onSearch }) => {
-  const [query, setQuery] = useState('');
+interface SearchBarProps {
+  value: string;
+  onChange: (value: string) => void;
+  onSearch: () => void;
+  placeholder?: string;
+}
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSearch(query);
+export function SearchBar({ value, onChange, onSearch, placeholder = "Search destinations..." }: SearchBarProps) {
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      onSearch();
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex justify-center p-4">
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search destinations..."
-        className="border p-2 rounded-l-md w-64"
-      />
-      <button type="submit" className="bg-blue-500 text-white p-2 rounded-r-md">Search</button>
-    </form>
+    <div className="flex gap-2 w-full max-w-2xl">
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
+        <Input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder={placeholder}
+          className="pl-10 bg-input-background"
+        />
+      </div>
+      <Button onClick={onSearch}>Search</Button>
+    </div>
   );
-};
-
-export default SearchBar;
+}
