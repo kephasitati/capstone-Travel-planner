@@ -2,14 +2,18 @@ import { Search } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 
-interface SearchBarProps {
-  value: string;
-  onChange: (value: string) => void;
-  onSearch: () => void;
-  placeholder?: string;
-}
+/**
+ * @typedef {Object} SearchBarProps
+ * @property {string} value
+ * @property {(value: string) => void} onChange
+ * @property {() => void} onSearch
+ * @property {string} [placeholder]
+ */
 
-export function SearchBar({ value, onChange, onSearch, placeholder = "Search destinations..." }: SearchBarProps) {
+/**
+ * @param {SearchBarProps} props
+ */
+export function SearchBar({ value, onChange, onSearch, placeholder = "Search destinations..." }) {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       onSearch();

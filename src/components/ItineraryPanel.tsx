@@ -182,4 +182,3 @@ export function ItineraryPanel({ items, onRemoveItem, onClose, isOpen }: Itinera
     </div>
   );
 }
- jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj,   
