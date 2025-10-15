@@ -21,6 +21,24 @@ import { Destination } from "./DestinationCard";
  * @property {Function} onAddHotel
  * @property {Function} onAddDestination
  */
+export type Destination = {
+  name: string;
+  country: string;
+  imageUrl: string;
+  rating?: number;
+  description?: string;
+};
+type DestinationDetailsProps = {
+  destination: Destination;
+  onClose: () => void;
+  flights: Array<any>;
+  hotels: Array<any>;
+  attractions: Array<string>;
+  weather?: { temp: number; condition: string };
+  onAddFlight: (flight: any) => void;
+  onAddHotel: (hotel: any) => void;
+  onAddDestination: (destination: Destination) => void;
+};
 
 export function DestinationDetails({
   destination,
@@ -32,7 +50,7 @@ export function DestinationDetails({
   onAddFlight,
   onAddHotel,
   onAddDestination,
-}) {
+}: DestinationDetailsProps) {
   return (
     <div className="fixed inset-0 bg-background z-40 overflow-hidden">
       <div className="h-full flex flex-col">

@@ -3,22 +3,7 @@ import { Card, CardContent, CardFooter } from "./ui/card";
 import { Button } from "./ui/button";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
-export interface Destination {
-  id: string;
-  name: string;
-  country: string;
-  cityCode: string;
-  imageUrl: string;
-  rating?: number;
-  description?: string;
-}
-
-interface DestinationCardProps {
-  destination: Destination;
-  onClick: () => void;
-}
-
-export function DestinationCard({ destination, onClick }: DestinationCardProps) {
+export function DestinationCard({ destination, onClick }) {
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={onClick}>
       <div className="aspect-video w-full overflow-hidden">

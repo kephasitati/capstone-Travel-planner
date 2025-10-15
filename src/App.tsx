@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, Calendar, Sun, Moon } from "lucide-react";
+import { Calendar, Sun, Moon } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { SearchBar } from "./components/SearchBar";
 import { DestinationCard } from "./components/DestinationCard";
@@ -8,62 +8,79 @@ import { ItineraryPanel } from "./components/ItineraryPanel";
 import { Flight } from "./components/FlightCard";
 import { HotelOffer } from "./components/HotelCard";
 import { searchDestinations, mockAttractions, mockFlights, mockHotels, mockWeather } from "./lib/mockData";
-import { Alert, AlertDescription } from "./components/ui/alert";
 import { Badge } from "./components/ui/badge";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 import { Toaster } from "./components/ui/sonner";
-import { Footer } from "./components/Footer";
+import { Footer } from "./components/footer";
+
+// Types
+export interface Destination {
+  id: string;
+  name: string;
+  cityCode: string;
+  description?: string;
+  image?: string;
+}
+
+export type ItineraryItemType = "destination" | "flight" | "hotel";
+
+export interface ItineraryItem {
+  id: string;
+  type: ItineraryItemType;
+  data: Destination | Flight | HotelOffer;
+}
 
 export default function App() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [selectedDestination, setSelectedDestination] = useState<Destination | null>(null);
   const [itineraryItems, setItineraryItems] = useState<ItineraryItem[]>([]);
-  const [showItinerary, setShowItinerary] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [showItinerary, setShowItinerary] = useState<boolean>(false);
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
+  const [darkMode, setDarkMode] = useState<boolean>(false);
 
-  const handleSearch = () => {
+  const handleSearch = (): void => {
     setHasSearched(true);
     const results = searchDestinations(searchQuery);
     setDestinations(results);
-    
+
     if (results.length === 0) {
-      toast.error("No destinations found. Try searching for Nairobi, Mombasa, Masai Mara, or other African destinations.");
+      toast.error(
+        "No destinations found. Try searching for Nairobi, Mombasa, Masai Mara, or other African destinations."
+      );
     }
   };
 
   const handleAddToItinerary = (
-    type: 'destination' | 'flight' | 'hotel',
+    type: ItineraryItemType,
     data: Destination | Flight | HotelOffer
-  ) => {
+  ): void => {
     const newItem: ItineraryItem = {
-      id: `${type}-${data.id}-${Date.now()}`,
+      id: `${type}-${(data as any).id}-${Date.now()}`,
       type,
       data
     };
-    
-    setItineraryItems([...itineraryItems, newItem]);
-    toast.success(`Added to itinerary!`);
+
+    setItineraryItems((prev) => [...prev, newItem]);
+    toast.success("Added to itinerary!");
   };
 
-  const handleRemoveFromItinerary = (id: string) => {
-    setItineraryItems(itineraryItems.filter(item => item.id !== id));
+  const handleRemoveFromItinerary = (id: string): void => {
+    setItineraryItems((prev) => prev.filter((item) => item.id !== id));
     toast.success("Removed from itinerary");
   };
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle('dark');
+  const toggleDarkMode = (): void => {
+    setDarkMode((prev) => !prev);
+    document.documentElement.classList.toggle("dark");
   };
 
-  // Show initial popular destinations
   const displayDestinations = hasSearched ? destinations : searchDestinations("");
 
   return (
     <div className="min-h-screen bg-background">
       <Toaster />
-      
+
       {/* Header */}
       <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-4">
@@ -74,7 +91,7 @@ export default function App() {
               </div>
               <h1 className="text-primary">Travel Planner</h1>
             </div>
-            
+
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
@@ -84,7 +101,7 @@ export default function App() {
               >
                 {darkMode ? <Sun size={20} /> : <Moon size={20} />}
               </Button>
-              
+
               <Button
                 variant="outline"
                 onClick={() => setShowItinerary(!showItinerary)}
@@ -105,7 +122,6 @@ export default function App() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        {/* Hero Section */}
         {!hasSearched && (
           <div className="text-center mb-12">
             <div className="mb-6">
@@ -130,7 +146,9 @@ export default function App() {
         {/* Results Section */}
         {hasSearched && destinations.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">No destinations found for "{searchQuery}"</p>
+            <p className="text-muted-foreground mb-4">
+              No destinations found for "{searchQuery}"
+            </p>
             <p className="text-muted-foreground">
               Try searching for: Nairobi, Mombasa, Masai Mara, Kisumu, Cape Town, Zanzibar, Victoria Falls, or Serengeti
             </p>
@@ -141,7 +159,8 @@ export default function App() {
               <h3>{hasSearched ? "Search Results" : "Popular Destinations"}</h3>
               {hasSearched && destinations.length > 0 && (
                 <p className="text-muted-foreground">
-                  Found {destinations.length} destination{destinations.length !== 1 ? 's' : ''}
+                  Found {destinations.length} destination
+                  {destinations.length !== 1 ? "s" : ""}
                 </p>
               )}
             </div>
@@ -168,9 +187,9 @@ export default function App() {
           hotels={mockHotels[selectedDestination.cityCode] || []}
           attractions={mockAttractions[selectedDestination.cityCode] || []}
           weather={mockWeather[selectedDestination.cityCode]}
-          onAddFlight={(flight) => handleAddToItinerary('flight', flight)}
-          onAddHotel={(hotel) => handleAddToItinerary('hotel', hotel)}
-          onAddDestination={(dest) => handleAddToItinerary('destination', dest)}
+          onAddFlight={(flight) => handleAddToItinerary("flight", flight)}
+          onAddHotel={(hotel) => handleAddToItinerary("hotel", hotel)}
+          onAddDestination={(dest) => handleAddToItinerary("destination", dest)}
         />
       )}
 
@@ -182,7 +201,6 @@ export default function App() {
         isOpen={showItinerary}
       />
 
-      {/* Footer */}
       <Footer />
     </div>
   );

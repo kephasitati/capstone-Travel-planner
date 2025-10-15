@@ -1,22 +1,25 @@
 import { MapPin, Star } from "lucide-react";
-import { Card, CardContent, CardFooter } from "./ui/card";
+// If the Card components are located in a different folder, update the path accordingly, for example:
+import { Card, CardContent, CardFooter } from "../ui/card";
+// Or, if they are in the same folder:
+//
+// import { Card, CardContent, CardFooter } from "./card";
 import { Button } from "./ui/button";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
+// Update the import path to the correct location, for example:
+import { ImageWithFallback } from "./ui/ImageWithFallback";
 
-export interface Destination {
-  id: string;
+type Destination = {
   name: string;
   country: string;
-  cityCode: string;
   imageUrl: string;
   rating?: number;
   description?: string;
-}
+};
 
-interface DestinationCardProps {
+type DestinationCardProps = {
   destination: Destination;
-  onClick: () => void;
-}
+  onClick?: () => void;
+};
 
 export function DestinationCard({ destination, onClick }: DestinationCardProps) {
   return (

@@ -4,23 +4,25 @@ import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
 import { Separator } from "./ui/separator";
 import { Badge } from "./ui/badge";
-import type { Flight } from "./FlightCard";
-import type { HotelOffer } from "./HotelCard";
-import type { Destination } from "./DestinationCard";
+import { Flight } from "./FlightCard";
+import { HotelOffer } from "./HotelCard";
+import { Destination } from "./DestinationCard";
 
-export interface ItineraryItem {
-  id: string;
-  type: 'destination' | 'flight' | 'hotel';
-  data: Destination | Flight | HotelOffer;
-  date?: string;
-}
+/**
+ * @typedef {Object} ItineraryItem
+ * @property {string} id
+ * @property {'destination' | 'flight' | 'hotel'} type
+ * @property {Destination | Flight | HotelOffer} data
+ * @property {string} [date]
+ */
 
-interface ItineraryPanelProps {
-  items: ItineraryItem[];
-  onRemoveItem: (id: string) => void;
-  onClose?: () => void;
-  isOpen: boolean;
-}
+/**
+ * @typedef {Object} ItineraryPanelProps
+ * @property {ItineraryItem[]} items
+ * @property {(id: string) => void} onRemoveItem
+ * @property {() => void} [onClose]
+ * @property {boolean} isOpen
+ */
 
 export function ItineraryPanel({ items, onRemoveItem, onClose, isOpen }: ItineraryPanelProps) {
   const totalCost = items.reduce((sum, item) => {
