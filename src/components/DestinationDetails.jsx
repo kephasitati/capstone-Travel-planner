@@ -5,24 +5,22 @@ import { ScrollArea } from "./ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Badge } from "./ui/badge";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { FlightCard, type Flight } from "./FlightCard";
-import { HotelCard, type HotelOffer } from "./HotelCard";
-import type { Destination } from "./DestinationCard";
+import { FlightCard } from "./FlightCard";
+import { HotelCard } from "./HotelCard";
+import { Destination } from "./DestinationCard";
 
-interface DestinationDetailsProps {
-  destination: Destination;
-  onClose: () => void;
-  flights: Flight[];
-  hotels: HotelOffer[];
-  attractions: string[];
-  weather?: {
-    temp: number;
-    condition: string;
-  };
-  onAddFlight: (flight: Flight) => void;
-  onAddHotel: (hotel: HotelOffer) => void;
-  onAddDestination: (destination: Destination) => void;
-}
+/**
+ * @typedef {Object} DestinationDetailsProps
+ * @property {Object} destination
+ * @property {Function} onClose
+ * @property {Array} flights
+ * @property {Array} hotels
+ * @property {Array<string>} attractions
+ * @property {{ temp: number, condition: string }} [weather]
+ * @property {Function} onAddFlight
+ * @property {Function} onAddHotel
+ * @property {Function} onAddDestination
+ */
 
 export function DestinationDetails({
   destination,
@@ -34,7 +32,7 @@ export function DestinationDetails({
   onAddFlight,
   onAddHotel,
   onAddDestination,
-}: DestinationDetailsProps) {
+}) {
   return (
     <div className="fixed inset-0 bg-background z-40 overflow-hidden">
       <div className="h-full flex flex-col">
