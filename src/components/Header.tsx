@@ -1,15 +1,20 @@
-import React from 'react';
-
 interface HeaderProps {
   itineraryCount: number;
   onToggleItinerary: () => void;
 }
 
-export const Header = ({ itineraryCount, onToggleItinerary }: HeaderProps) => {
+export function Header({ itineraryCount, onToggleItinerary }: HeaderProps) {
   return (
-    <header className="bg-primary p-4 text-white">
-      <h1>Travel Planner</h1>
-      <button onClick={onToggleItinerary}>Itinerary ({itineraryCount})</button>
+    <header className="border-b p-4">
+      <div className="max-w-7xl mx-auto flex justify-between items-center">
+        <h1>Safari Planner</h1>
+        <button 
+          onClick={onToggleItinerary} 
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
+        >
+          My Safari ({itineraryCount})
+        </button>
+      </div>
     </header>
   );
-};
+}
