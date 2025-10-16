@@ -6,6 +6,8 @@ import { SearchBar } from "./components/SearchBar";
 import { DestinationCard, type Destination } from "./components/DestinationCard";
 import { ItineraryPlanner } from "./components/ItineraryPlanner";
 import { Footer } from "./components/Footer";
+import { HotelComparison } from "./components/HotelComparison";
+import type { HotelOffer } from "./components/HotelCard";
 
 export default function App() {
   const [search, setSearch] = useState("");
@@ -14,19 +16,35 @@ export default function App() {
   const [showItinerary, setShowItinerary] = useState(false);
   const [selected, setSelected] = useState<Destination | null>(null);
   const [tab, setTab] = useState<'attractions' | 'flights' | 'hotels'>('attractions');
+  const [compareHotels, setCompareHotels] = useState<HotelOffer[]>([]);
+  const [showComparison, setShowComparison] = useState(false);
 
   const handleSearch = () => {
     setDestinations(searchDestinations(search));
   };
 
+  const toggleHotelCompare = (hotel: HotelOffer) => {
+    setCompareHotels(prev => {
+      const exists = prev.find(h => h.id === hotel.id);
+      if (exists) {
+        return prev.filter(h => h.id !== hotel.id);
+      }
+      return [...prev, hotel];
+    });
+  };
+
+  const isHotelSelected = (hotelId: string) => {
+    return compareHotels.some(h => h.id === hotelId);
+  };
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header 
         itineraryCount={itinerary.length}
         onToggleItinerary={() => setShowItinerary(!showItinerary)}
       />
 
-      <main className="max-w-7xl mx-auto p-4">
+      <main className="max-w-7xl mx-auto p-4 flex-1">
         <SearchBar 
           value={search}
           onChange={setSearch}
@@ -45,8 +63,9 @@ export default function App() {
           ))}
         </div>
       </main>
+
       <Footer />
-      
+
       {/* Itinerary */}
       <ItineraryPlanner
         itinerary={itinerary}
@@ -54,6 +73,15 @@ export default function App() {
         onClose={() => setShowItinerary(false)}
         onRemove={(id) => setItinerary(itinerary.filter(d => d.id !== id))}
       />
+
+      {/* Hotel Comparison */}
+      {showComparison && (
+        <HotelComparison
+          hotels={compareHotels}
+          onClose={() => setShowComparison(false)}
+          onRemove={(id) => setCompareHotels(compareHotels.filter(h => h.id !== id))}
+        />
+      )}
 
       {/* Details */}
       {selected && (
@@ -119,20 +147,45 @@ export default function App() {
               )}
 
               {tab === 'hotels' && (
-                <div className="space-y-3 mb-6">
-                  {(mockHotels[selected.cityCode] || []).map((hotel) => (
-                    <div key={hotel.id} className="border rounded-lg overflow-hidden grid md:grid-cols-3">
-                      <img src={hotel.imageUrl} alt={hotel.name} className="w-full aspect-square object-cover" />
-                      <div className="md:col-span-2 p-4">
-                        <h4>{hotel.name}</h4>
-                        <p className="text-muted-foreground my-2">{hotel.rating} stars</p>
-                        <p className="text-muted-foreground mb-3">{hotel.distance}</p>
-                        <p className="text-muted-foreground mb-4">{hotel.amenities.join(', ')}</p>
-                        <div className="text-primary">${hotel.price} / night</div>
+                <>
+                  <div className="space-y-3 mb-6">
+                    {(mockHotels[selected.cityCode] || []).map((hotel) => (
+                      <div key={hotel.id} className="border rounded-lg overflow-hidden grid md:grid-cols-3">
+                        <img src={hotel.imageUrl} alt={hotel.name} className="w-full aspect-square object-cover" />
+                        <div className="md:col-span-2 p-4">
+                          <div className="flex items-start gap-3 mb-2">
+                            <input 
+                              type="checkbox"
+                              checked={isHotelSelected(hotel.id)}
+                              onChange={() => toggleHotelCompare(hotel)}
+                              className="mt-1"
+                            />
+                            <div className="flex-1">
+                              <h4>{hotel.name}</h4>
+                              <p className="text-muted-foreground my-2">{hotel.rating} stars</p>
+                              <p className="text-muted-foreground mb-3">{hotel.distance}</p>
+                              <p className="text-muted-foreground mb-4">{hotel.amenities.join(', ')}</p>
+                              <div className="text-primary">${hotel.price} / night</div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                  
+                  {compareHotels.length > 0 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelected(null);
+                        setShowComparison(true);
+                      }}
+                      className="w-full py-2 rounded-lg bg-primary text-primary-foreground mb-4"
+                    >
+                      Compare Hotels ({compareHotels.length})
+                    </button>
+                  )}
+                </>
               )}
 
               <button 
