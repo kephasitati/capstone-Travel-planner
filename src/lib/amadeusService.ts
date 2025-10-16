@@ -1,4 +1,7 @@
-import { projectId, publicAnonKey } from '../utils/supabase/info';
+// src/lib/amadeusService.ts
+
+const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+const publicAnonKey = import.meta.env.VITE_SUPABASE_PUBLIC_ANON_KEY;
 
 const API_BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-d1af544d`;
 
@@ -8,7 +11,7 @@ interface ApiOptions {
 
 async function makeApiCall(endpoint: string, options: ApiOptions = {}) {
   const { params = {} } = options;
-  
+
   const url = new URL(`${API_BASE_URL}${endpoint}`);
   Object.entries(params).forEach(([key, value]) => {
     if (value) url.searchParams.append(key, value);
@@ -17,7 +20,7 @@ async function makeApiCall(endpoint: string, options: ApiOptions = {}) {
   try {
     const response = await fetch(url.toString(), {
       headers: {
-        'Authorization': `Bearer ${publicAnonKey}`,
+        Authorization: `Bearer ${publicAnonKey}`,
       },
     });
 
@@ -133,7 +136,7 @@ export async function searchAttractions(latitude: string, longitude: string, rad
 }
 
 /**
- * Format Amadeus flight data to match our app structure
+ * Format Amadeus flight data
  */
 export function formatFlightData(amadeusData: any) {
   if (!amadeusData?.data || amadeusData.data.length === 0) {
@@ -167,7 +170,7 @@ export function formatFlightData(amadeusData: any) {
 }
 
 /**
- * Format Amadeus hotel data to match our app structure
+ * Format Amadeus hotel data
  */
 export function formatHotelData(hotelListData: any, hotelOffersData?: any) {
   if (!hotelListData?.data || hotelListData.data.length === 0) {
@@ -175,19 +178,18 @@ export function formatHotelData(hotelListData: any, hotelOffersData?: any) {
   }
 
   return hotelListData.data.slice(0, 10).map((hotel: any, index: number) => {
-    // Try to find matching offer if provided
     const offer = hotelOffersData?.data?.find((o: any) => o.hotel.hotelId === hotel.hotelId);
-    
+
     return {
       id: hotel.hotelId,
       name: hotel.name,
-      rating: 4, // Amadeus doesn't provide ratings in the hotel list endpoint
+      rating: 4,
       price: offer?.offers?.[0]?.price?.total || 150,
       currency: offer?.offers?.[0]?.price?.currency || 'USD',
       pricePerNight: true,
       imageUrl: `https://images.unsplash.com/photo-${1566073771259 + index}?w=800`,
       amenities: hotel.amenities?.slice(0, 3) || ['WiFi', 'Restaurant', 'Pool'],
-      distance: hotel.distance?.value 
+      distance: hotel.distance?.value
         ? `${hotel.distance.value}${hotel.distance.unit} from center`
         : 'City center',
     };
