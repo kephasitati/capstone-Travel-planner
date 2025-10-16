@@ -5,6 +5,7 @@ import { Header } from "./components/Header";
 import { SearchBar } from "./components/SearchBar";
 import { DestinationCard, type Destination } from "./components/DestinationCard";
 import { ItineraryPlanner } from "./components/ItineraryPlanner";
+import { Footer } from "./components/Footer";
 
 export default function App() {
   const [search, setSearch] = useState("");
@@ -44,7 +45,8 @@ export default function App() {
           ))}
         </div>
       </main>
-
+      <Footer />
+      
       {/* Itinerary */}
       <ItineraryPlanner
         itinerary={itinerary}
