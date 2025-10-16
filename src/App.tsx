@@ -1,13 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import { searchDestinations, mockAttractions, mockFlights, mockHotels } from "./lib/mockData";
+import { searchDestinations, mockAttractions } from "./lib/mockData";
 import { Header } from "./components/Header";
 import { SearchBar } from "./components/SearchBar";
 import { DestinationCard, type Destination } from "./components/DestinationCard";
 import { ItineraryPlanner } from "./components/ItineraryPlanner";
 import { Footer } from "./components/Footer";
 import { HotelComparison } from "./components/HotelComparison";
+import { ApiStatus } from "./components/ApiStatus";
 import type { HotelOffer } from "./components/HotelCard";
+import type { Flight } from "./components/FlightCard";
+import * as amadeusService from "./lib/amadeusService";
 
 export default function App() {
   const [search, setSearch] = useState("");
@@ -18,6 +21,14 @@ export default function App() {
   const [tab, setTab] = useState<'attractions' | 'flights' | 'hotels'>('attractions');
   const [compareHotels, setCompareHotels] = useState<HotelOffer[]>([]);
   const [showComparison, setShowComparison] = useState(false);
+  
+  // Amadeus API data
+  const [flights, setFlights] = useState<Flight[]>([]);
+  const [hotels, setHotels] = useState<HotelOffer[]>([]);
+  const [loadingFlights, setLoadingFlights] = useState(false);
+  const [loadingHotels, setLoadingHotels] = useState(false);
+  const [flightError, setFlightError] = useState<string | null>(null);
+  const [hotelError, setHotelError] = useState<string | null>(null);
 
   const handleSearch = () => {
     setDestinations(searchDestinations(search));
@@ -36,6 +47,66 @@ export default function App() {
   const isHotelSelected = (hotelId: string) => {
     return compareHotels.some(h => h.id === hotelId);
   };
+
+  // Load flights when destination is selected and flights tab is active
+  useEffect(() => {
+    if (!selected || tab !== 'flights') return;
+
+    const loadFlights = async () => {
+      setLoadingFlights(true);
+      setFlightError(null);
+      
+      try {
+        // Get departure date (tomorrow)
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const departureDate = tomorrow.toISOString().split('T')[0];
+
+        const response = await amadeusService.searchFlights({
+          origin: 'JFK', // Default origin - could be made dynamic
+          destination: selected.cityCode,
+          departureDate,
+          adults: '1',
+          max: '10',
+        });
+
+        const formattedFlights = amadeusService.formatFlightData(response);
+        setFlights(formattedFlights);
+      } catch (error) {
+        console.error('Error loading flights:', error);
+        setFlightError(error instanceof Error ? error.message : 'Failed to load flights');
+        setFlights([]);
+      } finally {
+        setLoadingFlights(false);
+      }
+    };
+
+    loadFlights();
+  }, [selected, tab]);
+
+  // Load hotels when destination is selected and hotels tab is active
+  useEffect(() => {
+    if (!selected || tab !== 'hotels') return;
+
+    const loadHotels = async () => {
+      setLoadingHotels(true);
+      setHotelError(null);
+      
+      try {
+        const response = await amadeusService.searchHotelsByCity(selected.cityCode);
+        const formattedHotels = amadeusService.formatHotelData(response);
+        setHotels(formattedHotels);
+      } catch (error) {
+        console.error('Error loading hotels:', error);
+        setHotelError(error instanceof Error ? error.message : 'Failed to load hotels');
+        setHotels([]);
+      } finally {
+        setLoadingHotels(false);
+      }
+    };
+
+    loadHotels();
+  }, [selected, tab]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -121,7 +192,25 @@ export default function App() {
 
               {tab === 'flights' && (
                 <div className="space-y-3 mb-6">
-                  {(mockFlights[selected.cityCode] || []).map((flight) => (
+                  {loadingFlights && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      Loading flights from Amadeus API...
+                    </div>
+                  )}
+                  
+                  {flightError && (
+                    <div className="text-center py-8 text-red-500">
+                      {flightError}
+                    </div>
+                  )}
+                  
+                  {!loadingFlights && !flightError && flights.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No flights available for this destination
+                    </div>
+                  )}
+                  
+                  {!loadingFlights && flights.map((flight) => (
                     <div key={flight.id} className="border rounded-lg p-4">
                       <div className="mb-3">
                         <span>{flight.airline}</span>
@@ -140,7 +229,7 @@ export default function App() {
                           <p className="text-muted-foreground">{flight.arrivalTime}</p>
                         </div>
                       </div>
-                      <div className="pt-3 border-t text-primary">${flight.price}</div>
+                      <div className="pt-3 border-t text-primary">${flight.price} {flight.currency}</div>
                     </div>
                   ))}
                 </div>
@@ -148,42 +237,64 @@ export default function App() {
 
               {tab === 'hotels' && (
                 <>
-                  <div className="space-y-3 mb-6">
-                    {(mockHotels[selected.cityCode] || []).map((hotel) => (
-                      <div key={hotel.id} className="border rounded-lg overflow-hidden grid md:grid-cols-3">
-                        <img src={hotel.imageUrl} alt={hotel.name} className="w-full aspect-square object-cover" />
-                        <div className="md:col-span-2 p-4">
-                          <div className="flex items-start gap-3 mb-2">
-                            <input 
-                              type="checkbox"
-                              checked={isHotelSelected(hotel.id)}
-                              onChange={() => toggleHotelCompare(hotel)}
-                              className="mt-1"
-                            />
-                            <div className="flex-1">
-                              <h4>{hotel.name}</h4>
-                              <p className="text-muted-foreground my-2">{hotel.rating} stars</p>
-                              <p className="text-muted-foreground mb-3">{hotel.distance}</p>
-                              <p className="text-muted-foreground mb-4">{hotel.amenities.join(', ')}</p>
-                              <div className="text-primary">${hotel.price} / night</div>
+                  {loadingHotels && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      Loading hotels from Amadeus API...
+                    </div>
+                  )}
+                  
+                  {hotelError && (
+                    <div className="text-center py-8 text-red-500">
+                      {hotelError}
+                    </div>
+                  )}
+                  
+                  {!loadingHotels && !hotelError && hotels.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No hotels available for this destination
+                    </div>
+                  )}
+                  
+                  {!loadingHotels && hotels.length > 0 && (
+                    <>
+                      <div className="space-y-3 mb-6">
+                        {hotels.map((hotel) => (
+                          <div key={hotel.id} className="border rounded-lg overflow-hidden grid md:grid-cols-3">
+                            <img src={hotel.imageUrl} alt={hotel.name} className="w-full aspect-square object-cover" />
+                            <div className="md:col-span-2 p-4">
+                              <div className="flex items-start gap-3 mb-2">
+                                <input 
+                                  type="checkbox"
+                                  checked={isHotelSelected(hotel.id)}
+                                  onChange={() => toggleHotelCompare(hotel)}
+                                  className="mt-1"
+                                />
+                                <div className="flex-1">
+                                  <h4>{hotel.name}</h4>
+                                  <p className="text-muted-foreground my-2">{hotel.rating} stars</p>
+                                  <p className="text-muted-foreground mb-3">{hotel.distance}</p>
+                                  <p className="text-muted-foreground mb-4">{hotel.amenities.join(', ')}</p>
+                                  <div className="text-primary">${hotel.price} / night</div>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                  
-                  {compareHotels.length > 0 && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelected(null);
-                        setShowComparison(true);
-                      }}
-                      className="w-full py-2 rounded-lg bg-primary text-primary-foreground mb-4"
-                    >
-                      Compare Hotels ({compareHotels.length})
-                    </button>
+                      
+                      {compareHotels.length > 0 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelected(null);
+                            setShowComparison(true);
+                          }}
+                          className="w-full py-2 rounded-lg bg-primary text-primary-foreground mb-4"
+                        >
+                          Compare Hotels ({compareHotels.length})
+                        </button>
+                      )}
+                    </>
                   )}
                 </>
               )}
@@ -198,6 +309,9 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* API Status Widget */}
+      <ApiStatus />
     </div>
   );
 }
