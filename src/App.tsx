@@ -311,7 +311,7 @@ export default function App() {
       )}
 
       {/* API Status Widget */}
-      <ApiStatus />
+      {import.meta.env.MODE === "development" && <ApiStatus />}
     </div>
   );
 }
