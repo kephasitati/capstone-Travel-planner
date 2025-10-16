@@ -121,7 +121,7 @@ export default function App() {
                   {(mockHotels[selected.cityCode] || []).map((hotel) => (
                     <div key={hotel.id} className="border rounded-lg overflow-hidden grid md:grid-cols-3">
                       <img src={hotel.imageUrl} alt={hotel.name} className="w-full aspect-square object-cover" />
-                      <div className="p-4 flex flex-col justify-center">
+                      <div className="md:col-span-2 p-4">
                         <h4>{hotel.name}</h4>
                         <p className="text-muted-foreground my-2">{hotel.rating} stars</p>
                         <p className="text-muted-foreground mb-3">{hotel.distance}</p>
