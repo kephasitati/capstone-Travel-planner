@@ -1,9 +1,6 @@
-// src/lib/amadeusService.ts
+const projectId = import.meta.env.krbaxodmlraiwkqbjuyw;
+const publicAnonKey = import.meta.env.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyYmF4b2RtbHJhaXdrcWJqdXl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyMzE2NTgsImV4cCI6MjA3MTgwNzY1OH0.44Oggv2BLKEG2NzpNb5w1ija4v-_4_t4EXVj3wl_yQY;
 
-const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-const publicAnonKey = import.meta.env.VITE_SUPABASE_PUBLIC_ANON_KEY;
-
-const API_BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-d1af544d`;
 
 interface ApiOptions {
   params?: Record<string, string>;
