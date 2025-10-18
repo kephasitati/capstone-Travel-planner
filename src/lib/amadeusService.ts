@@ -1,8 +1,7 @@
 const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
 const publicAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-const API_BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-d1af544d`;
-
+const API_BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server`;
 
 interface ApiOptions {
   params?: Record<string, string>;
