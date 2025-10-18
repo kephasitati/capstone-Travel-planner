@@ -1,7 +1,6 @@
 const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
 const publicAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-const API_BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server`;
+const API_BASE_URL = `https://krbaxodmlraiwkqbjuyw.supabase.co/functions/v1/make-server`;
 
 interface ApiOptions {
   params?: Record<string, string>;
@@ -17,9 +16,11 @@ async function makeApiCall(endpoint: string, options: ApiOptions = {}) {
 
   try {
     const response = await fetch(url.toString(), {
+      method: "GET",
       headers: {
-        Authorization: `Bearer ${publicAnonKey}`,
-      },
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${publicAnonKey}`
+      }
     });
 
     if (!response.ok) {
